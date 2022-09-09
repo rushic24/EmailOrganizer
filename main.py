@@ -1,6 +1,7 @@
 import imapclient
 import os
 
+MODE = "gmail"
 
 class IMAPClient:
     def __init__(self, email, password, imap_server):
@@ -29,7 +30,13 @@ class IMAPClient:
             new_folder: target folder to move emails
             search: search keyword to filter emails
         '''
-        ids = imapObj.gmail_search(search)
+        ids=[]
+        if MODE == "outlook":
+            # For outlook Search keywords need to be lists described here https://imapclient.readthedocs.io/en/master/api.html?highlight=search#imapclient.IMAPClient.search
+            ids = imapObj.search(search)
+        else:
+            ids = imapObj.gmail_search(search)
+
         if len(ids) > 0:
             print(f'Moving {len(ids)} emails related to {search}')
             imapObj.move(messages=ids, folder=new_folder)
@@ -37,7 +44,12 @@ class IMAPClient:
 
 
 if __name__ == '__main__':
-    client = IMAPClient(email=os.environ.get('EMAIL'), password=os.environ.get('EMAIL_PWD'), imap_server="imap.gmail.com")
-    client.organize_emails(old_folder='INBOX', new_folder='Git Related', search_keywords=['github', 'gitlab'])
-    client.organize_emails(old_folder='INBOX', new_folder='Internship Related', search_keywords=['internship', 'job fair'])
-    client.organize_emails(old_folder='INBOX', new_folder='ATH Móvil', search_keywords=['ath móvil'])
+
+    if MODE == "outlook":
+        imap_server="imap-mail.outlook.com" # or 'outlook.office365.com'
+    else:
+        imap_server = "imap.gmail.com"
+    
+    client = IMAPClient(email=os.environ.get('EMAIL'), password=os.environ.get('EMAIL_PWD'), imap_server=imap_server)
+    client.organize_emails(old_folder='INBOX', new_folder='Check in', search_keywords=['Time to fill out your Check-in'])
+    client.organize_emails(old_folder='INBOX', new_folder='Asana', search_keywords=['Asana'])
